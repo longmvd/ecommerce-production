@@ -1,0 +1,202 @@
+version: "3.4"
+services:
+
+  api-gateway:
+    image: giadienanhkysi/ecommerce-api-gateway:latest
+    build:
+      context: ../Backend/ApiGatewayService
+      dockerfile: Dockerfile
+    ports:
+      - '5500:80'
+    expose:
+      - 80
+
+  # auth
+  auth-service:
+    image: giadienanhkysi/ecommerce-auth:latest
+    build:
+      context: ../Backend/AuthService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '5600:80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # product
+  product-service:
+    image: giadienanhkysi/ecommerce-product:latest
+    build:
+      context: ../Backend/ProductService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '5600:80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+      - file-service
+
+  # purchase
+  purchase-service:
+    image: giadienanhkysi/ecommerce-purchase:latest
+    build:
+      context: ../Backend/PurchaseService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+      - api-gateway
+
+  # cart
+  cart-service:
+    image: giadienanhkysi/ecommerce-cart:latest
+    build:
+      context: ../Backend/CartService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # order
+  order-service:
+    image: giadienanhkysi/ecommerce-order:latest
+    build:
+      context: ../Backend/OrderService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # payment
+  payment-service:
+    image: giadienanhkysi/ecommerce-payment:latest
+    build:
+      context: ../Backend/PaymentService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # shipment
+  shipment-service:
+    image: giadienanhkysi/ecommerce-shipment:latest
+    build:
+      context: ../Backend/ShipmentService
+      dockerfile: Dockerfile
+    # ports:
+    #   - '80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # file
+
+  file-service:
+    image: giadienanhkysi/ecommerce-file:latest
+    build:
+      context: ../Backend/FileServices
+      dockerfile: Dockerfile
+    ports:
+      - '5237:80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  # websocket
+  notification-service:
+    image: giadienanhkysi/ecommerce-notification:latest
+    build:
+      context: ../Backend/WsServer
+      dockerfile: Dockerfile
+    ports:
+      - '5017:80'
+    expose:
+      - 80
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - db
+
+  db:
+    image: mysql:8.0.31
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456 # Change the root password here
+    ports:
+      - "3309:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  # eureka
+  eureka-server:
+    image: steeltoeoss/eureka-server:latest
+    ports:
+      - "8761:8761"
+
+  # rabbitmq:
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    ports:
+      - "5672:5672" # RabbitMQ default port
+      - "15672:15672" # RabbitMQ Management Plugin
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+
+  # stripe
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli
+    # stripe listen --events checkout.session.completed  --forward-to api-gateway:5500/paymentService/api/stripewebhook
+    command: "listen --api-key ${STRIPE_API_KEY} --device-name ${STRIPE_DEVICE_NAME} --events checkout.session.completed --forward-to api-gateway:5500/paymentService/api/stripewebhook"
+    env_file:
+      - ./stripe_cli.env
+
+  frontend:
+    image: giadienanhkysi/ecommerce-frontend:latest
+    ports:
+      - '8080:80'
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - api-gateway
+    tty: true
+
+volumes:
+  db-data:
+
+
+networks:
+  default:
