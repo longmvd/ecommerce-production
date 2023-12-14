@@ -125,8 +125,6 @@ services:
     build:
       context: ../Backend/FileServices
       dockerfile: Dockerfile
-    ports:
-      - '5237:80'
     expose:
       - 80
     depends_on:
@@ -186,7 +184,7 @@ services:
   frontend:
     image: giadienanhkysi/ecommerce-frontend:latest
     ports:
-      - '8080:80'
+      - '80:80'
     build:
       context: ../frontend
       dockerfile: Dockerfile
