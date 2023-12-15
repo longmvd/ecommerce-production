@@ -1,6 +1,7 @@
 version: "3.4"
 services:
 
+  # 1 api gateway
   api-gateway:
     image: giadienanhkysi/ecommerce-api-gateway:latest
     build:
@@ -11,7 +12,7 @@ services:
     expose:
       - 80
 
-  # auth
+  # 2 auth
   auth-service:
     image: giadienanhkysi/ecommerce-auth:latest
     build:
@@ -21,12 +22,13 @@ services:
     #   - '5600:80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
 
-  # product
+  # 3 product
   product-service:
     image: giadienanhkysi/ecommerce-product:latest
     build:
@@ -36,13 +38,14 @@ services:
     #   - '5600:80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
       - file-service
 
-  # purchase
+  # 4 purchase
   purchase-service:
     image: giadienanhkysi/ecommerce-purchase:latest
     build:
@@ -52,13 +55,14 @@ services:
     #   - '80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
       - api-gateway
 
-  # cart
+  # 5 cart
   cart-service:
     image: giadienanhkysi/ecommerce-cart:latest
     build:
@@ -68,12 +72,13 @@ services:
     #   - '80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
 
-  # order
+  # 6 order
   order-service:
     image: giadienanhkysi/ecommerce-order:latest
     build:
@@ -81,6 +86,7 @@ services:
       dockerfile: Dockerfile
     # ports:
     #   - '80'
+    restart: on-failure
     expose:
       - 80
     depends_on:
@@ -88,7 +94,7 @@ services:
       - eureka-server
       - db
 
-  # payment
+  # 7 payment
   payment-service:
     image: giadienanhkysi/ecommerce-payment:latest
     build:
@@ -98,12 +104,13 @@ services:
     #   - '80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
 
-  # shipment
+  # 8 shipment
   shipment-service:
     image: giadienanhkysi/ecommerce-shipment:latest
     build:
@@ -113,13 +120,13 @@ services:
     #   - '80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
 
-  # file
-
+  # 9 file
   file-service:
     image: giadienanhkysi/ecommerce-file:latest
     build:
@@ -127,12 +134,13 @@ services:
       dockerfile: Dockerfile
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
       - db
 
-  # websocket
+  # 10 websocket
   notification-service:
     image: giadienanhkysi/ecommerce-notification:latest
     build:
@@ -142,6 +150,7 @@ services:
       - '5017:80'
     expose:
       - 80
+    restart: on-failure
     depends_on:
       - rabbitmq
       - eureka-server
