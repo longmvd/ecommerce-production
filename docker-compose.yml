@@ -140,7 +140,7 @@ services:
       - eureka-server
       - db
     volumes:
-      - file-store:/home/app/file-store
+      - /home/Upload:/app/Upload
 
   # 10 websocket
   notification-service:
